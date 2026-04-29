@@ -1,0 +1,52 @@
+.modItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 12px;
+}
+
+.modItem:last-child {
+  border-bottom: none;
+}
+
+.modContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.modIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.modInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.modName {
+  color: #48bb78;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.modVersion {
+  color: #cbd5e0;
+  font-size: 12px;
+}
+
+.activeBadge {
+  color: #f6ad55;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}

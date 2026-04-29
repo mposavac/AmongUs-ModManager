@@ -1,0 +1,19 @@
+.installedModsContainer {
+  background-color: #3a4554;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.title {
+  color: #e0e7ff;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modsList {
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,61 @@
+.gameInfoContainer {
+  background-color: #3a4554;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: #e0e7ff;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+}
+
+.label {
+  color: #cbd5e0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.value {
+  color: #f7fafc;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Courier New", monospace;
+  word-break: break-all;
+}
+
+.version {
+  color: #fbbf24;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.success {
+  color: #48bb78;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.error {
+  color: #f56565;
+  font-size: 14px;
+  font-weight: 600;
+}

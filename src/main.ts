@@ -1,6 +1,12 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
+import { getAmongUsLocation } from "./utils/getAmongUs";
+import { intallLatestMod } from "./utils/intallLatestMod";
+import { findBetterCrew } from "./utils/getBetterCrew";
+import { cleanInstall } from "./utils/cleanInstall";
+import { getMiraMod } from "./utils/getMiraMod";
+import { launchGame } from "./utils/launchGame";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -10,10 +16,9 @@ if (started) {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 400,
-    height: 400,
+    width: 800,
+    height: 600,
     webPreferences: {
-      nodeIntegration: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -48,4 +53,35 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+ipcMain.handle("locate-game", async () => {
+  const path = getAmongUsLocation();
+  return path;
+});
+
+ipcMain.handle("locate-mira-mod", async () => {
+  const data = getMiraMod();
+  return data;
+});
+
+ipcMain.handle("locate-better-crew", async () => {
+  const data = findBetterCrew();
+  return data;
+});
+
+ipcMain.handle("open-external", async (_, url) => {
+  shell.openExternal(url);
+});
+
+ipcMain.handle("clean-install", async (event, gamePath) => {
+  await cleanInstall(event, gamePath);
+});
+
+ipcMain.handle("install-mod", async (event, gamePath) => {
+  intallLatestMod(event, gamePath);
+});
+
+ipcMain.handle("launch-game", async () => {
+  launchGame();
 });

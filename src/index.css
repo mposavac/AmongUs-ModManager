@@ -1,8 +1,30 @@
+* {
+  box-sizing: border-box;
+
+}
+
+@font-face {
+  font-family: 'InYourFaceJoffrey';
+  src: url('./InYourFaceJoffrey.ttf') format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 170%;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  background-color: #1a202c;
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

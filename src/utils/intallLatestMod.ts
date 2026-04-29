@@ -1,0 +1,87 @@
+import axios from "axios";
+import fs from "fs";
+import path from "path";
+import AdmZip from "adm-zip";
+import { app } from "electron";
+import { sendMessage } from "./sendMessage";
+import { getMiraMod } from "./getMiraMod";
+import { IModItem } from "../types/mods";
+
+export const intallLatestMod = async (event: any, gamePath: string) => {
+  const repoUrl = import.meta.env.VITE_MOD_API_URL;
+  const tempZipPath = path.join(app.getPath("downloads"), "mod-download.zip");
+
+  try {
+    // Get the download URL from GitHub API
+    const { data } = await axios.get(repoUrl);
+    const downloadUrl = data.assets.find((a) =>
+      a.name.includes("steam-itch.zip"),
+    )?.browser_download_url;
+
+    // Download the mod file
+    const response = await axios.get(downloadUrl, {
+      responseType: "arraybuffer",
+    });
+    fs.writeFileSync(tempZipPath, response.data);
+
+    // Smart Unzip Logic
+    sendMessage(
+      event,
+      "clean-install-status",
+      `Intalling the mod (version ${data?.name})...`,
+    );
+    const zip = new AdmZip(tempZipPath);
+    const zipEntries = zip.getEntries(); // Get all files/folders in zip
+
+    // Find the first folder entry (the one you don't know the name of)
+    // Usually, the first entry is the root folder
+    const rootFolderName = zipEntries[0].entryName.split("/")[0];
+
+    zipEntries.forEach((entry) => {
+      // Check if the file is inside that root folder
+      if (entry.entryName.startsWith(rootFolderName + "/")) {
+        // Strip the root folder name from the path
+        const targetPath = entry.entryName.replace(rootFolderName + "/", "");
+
+        if (targetPath.length > 0) {
+          // Ensure it's not the folder itself
+          if (entry.isDirectory) {
+            const dirToCreate = path.join(gamePath, targetPath);
+            if (!fs.existsSync(dirToCreate))
+              fs.mkdirSync(dirToCreate, { recursive: true });
+          } else {
+            // Extract the file manually to the game folder
+            const targetFile = path.join(gamePath, targetPath);
+            fs.writeFileSync(targetFile, entry.getData());
+          }
+        }
+      }
+    });
+    sendMessage(
+      event,
+      "clean-install-status",
+      `Mod successfully installed (version ${data?.name})...`,
+    );
+    const modData: Partial<IModItem> | null = await getMiraMod();
+    if (!modData) {
+      throw "Not installed";
+    }
+    sendMessage(event, "mod-version-change", {
+      name: "tou-mira",
+      data: modData,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: error.message };
+  } finally {
+    // Delete temp file
+    if (fs.existsSync(tempZipPath)) {
+      try {
+        fs.unlinkSync(tempZipPath);
+      } catch (err) {
+        console.error("Failed to delete temp ZIP:", err);
+      }
+    }
+  }
+};

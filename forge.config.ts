@@ -23,8 +23,8 @@ const config: ForgeConfig = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "me",
-          name: "awesome-thing",
+          owner: "mposavac",
+          name: "AmongUs-ModManager",
         },
         prerelease: true,
       },

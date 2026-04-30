@@ -16,6 +16,7 @@ import {
   TbBrandAmongUs,
 } from "../icons/icons";
 import logo from "../assets/img/logo.png";
+import packageJson from "../../package.json";
 
 export const ModManager: React.FC = () => {
   const [status, setStatus] = useState(mockLauncherStatus);
@@ -53,7 +54,6 @@ export const ModManager: React.FC = () => {
     getModsInfo();
   }, []);
 
-  console.log({ gameInfo, installedMods });
   useEffect(() => {
     window.electronAPI.onCleanStatusUpdate((message: string) => {
       setStatus({ message, status: "loading" });
@@ -129,6 +129,7 @@ export const ModManager: React.FC = () => {
           <div className={styles.logo}>
             <img src={logo} alt="Among Us Logo" className={styles.logoImage} />
             <h1 className={styles.logoText}>MOD MANAGER</h1>
+            <p>v{packageJson.version}</p>
           </div>
 
           <div className={styles.buttonGroup}>

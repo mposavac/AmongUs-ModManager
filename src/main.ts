@@ -7,6 +7,9 @@ import { findBetterCrew } from "./utils/getBetterCrew";
 import { cleanInstall } from "./utils/cleanInstall";
 import { getMiraMod } from "./utils/getMiraMod";
 import { launchGame } from "./utils/launchGame";
+import { updateElectronApp } from "update-electron-app";
+
+updateElectronApp();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -18,6 +21,10 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    alwaysOnTop: true,
+    fullscreenable: false,
+    resizable: false,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },

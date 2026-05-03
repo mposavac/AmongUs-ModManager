@@ -10,11 +10,10 @@ export const launchGame = async () => {
     "Better-CrewLink.exe",
   );
   try {
-    exec(`"${bclPath}"`, () => {
-      execSync("start steam://launch/945360");
-      const win = BrowserWindow.getFocusedWindow();
-      if (win) win.minimize();
-    });
+    exec(`"${bclPath}"`);
+    execSync("start steam://launch/945360");
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) win.minimize();
 
     return { success: true };
   } catch (error) {

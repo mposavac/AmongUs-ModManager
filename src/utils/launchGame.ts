@@ -13,11 +13,11 @@ export const launchGame = async () => {
   try {
     exec(`"${bclPath}"`, (error) => {
       if (error) {
+        console.error(`Launch error: ${error}`);
+      } else {
         execSync("start steam://launch/945360");
         const win = BrowserWindow.getFocusedWindow();
         if (win) win.minimize();
-
-        console.error(`Launch error: ${error}`);
       }
     });
 

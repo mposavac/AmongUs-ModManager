@@ -7,8 +7,10 @@ import { miraModDefault } from "./mockData";
 
 export const cleanInstall = async (event: any, gamePath: string) => {
   try {
-    const steamPath = path.resolve(gamePath, "..", "..", ".."); // 1. Exit Steam
+    const steamPath = path.resolve(gamePath, "..", "..", "..");
+    execSync("start steam://start");
     sendMessage(event, "clean-install-status", "Closing steam...");
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     console.log("Closing Steam...");
     execSync("start steam://exit");
 

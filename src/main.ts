@@ -31,7 +31,8 @@ const createWindow = () => {
     alwaysOnTop: true,
     fullscreenable: false,
     resizable: false,
-    // autoHideMenuBar: true,
+    autoHideMenuBar: true,
+    icon: path.join(__dirname, "assets/img/logo.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },

@@ -27,6 +27,7 @@ const config: ForgeConfig = {
           name: "AmongUs-ModManager",
         },
         prerelease: true,
+        draft: true,
       },
     },
   ],

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "./ui/Button";
 import { GameInfo } from "./ui/GameInfo";
 import { InstalledMods } from "./ui/InstalledMods";
@@ -17,40 +17,42 @@ import {
 } from "../icons/icons";
 import logo from "../assets/img/logo.png";
 import packageJson from "../../package.json";
+import { getLatestModVersionData } from "../utils/getLatestModVersionData";
 
 export const ModManager: React.FC = () => {
   const [status, setStatus] = useState(mockLauncherStatus);
   const [gameInfo, setGameInfo] = useState<IGameInfo | null>(null);
   const [installedMods, setInstalledMods] = useState<IModsInfo | null>(null);
 
-  useEffect(() => {
-    const getGameInfo = async () => {
-      const gamePath = await window.electronAPI.findAmongUs();
-      setGameInfo({
-        isInstalled: !!gamePath,
-        detectedLocation: gamePath || "",
-        version: "123",
-      });
-    };
-    getGameInfo();
+  const getGameInfo = useCallback(async () => {
+    const gamePath = await window.electronAPI.findAmongUs();
+    setGameInfo({
+      isInstalled: !!gamePath,
+      detectedLocation: gamePath || "",
+      version: "123",
+    });
+  }, []);
+
+  const getModsInfo = useCallback(async () => {
+    const betterCrewData: IModItem = await window.electronAPI.findBetterCrew();
+    const miraModData: IModItem = await window.electronAPI.findMiraMod();
+    const latestRealeaseData = await getLatestModVersionData();
+    setInstalledMods({
+      "better-crewmates": {
+        ...betterCrewDefault,
+        ...betterCrewData,
+      },
+      "tou-mira": {
+        ...miraModDefault,
+        ...miraModData,
+        isUpdateAvailable:
+          miraModData.version !== latestRealeaseData.name?.replace("v", ""),
+      },
+    });
   }, []);
 
   useEffect(() => {
-    const getModsInfo = async () => {
-      const betterCrewData: IModItem =
-        await window.electronAPI.findBetterCrew();
-      const miraModData: IModItem = await window.electronAPI.findMiraMod();
-      setInstalledMods({
-        "better-crewmates": {
-          ...betterCrewDefault,
-          ...betterCrewData,
-        },
-        "tou-mira": {
-          ...miraModDefault,
-          ...miraModData,
-        },
-      });
-    };
+    getGameInfo();
     getModsInfo();
   }, []);
 
@@ -65,6 +67,7 @@ export const ModManager: React.FC = () => {
           ...curr,
           [modName]: { ...curr[modName], ...modData },
         }));
+        setStatus({ message: "Game is ready!", status: "idle" });
       },
     );
   }, []);
@@ -77,11 +80,12 @@ export const ModManager: React.FC = () => {
     await window.electronAPI.cleanInstall(gameInfo?.detectedLocation);
   };
 
-  const handleUpdateMod = () => {
+  const handleUpdateMod = async () => {
     setStatus({
       status: "loading",
-      message: "Checking for mod update...",
+      message: "Installing latest mod update...",
     });
+    await window.electronAPI.installLatestMod(gameInfo?.detectedLocation);
   };
 
   const handleInstallBetterCrew = async () => {
@@ -100,11 +104,13 @@ export const ModManager: React.FC = () => {
     await window.electronAPI.launchGame();
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setStatus({
       status: "loading",
       message: "Refreshing game information...",
     });
+    await getGameInfo();
+    await getModsInfo();
     setTimeout(() => {
       setStatus({
         status: "idle",
@@ -112,6 +118,7 @@ export const ModManager: React.FC = () => {
       });
     }, 1500);
   };
+
   if (!gameInfo || !installedMods) {
     return (
       <div className={styles.logo}>
@@ -129,7 +136,7 @@ export const ModManager: React.FC = () => {
           <div className={styles.logo}>
             <img src={logo} alt="Among Us Logo" className={styles.logoImage} />
             <h1 className={styles.logoText}>MOD MANAGER</h1>
-            <p>v{packageJson.version}</p>
+            <p className={styles.logoVersion}>({packageJson.version})</p>
           </div>
 
           <div className={styles.buttonGroup}>
@@ -138,25 +145,34 @@ export const ModManager: React.FC = () => {
               icon={<TbBrandAmongUs />}
               onClick={handleLaunchGame}
               variant="primary"
-              disabled={false}
+              disabled={
+                !(
+                  status.status === "idle" &&
+                  installedMods["tou-mira"].isActive &&
+                  gameInfo.isInstalled
+                )
+              }
             />
             <Button
               label="CLEAN INSTALL"
               icon={<GiBroom />}
               onClick={handleCleanInstall}
               variant="danger"
+              disabled={status.status !== "idle"}
             />
-            <Button
-              label={
-                installedMods["tou-mira"].isActive
-                  ? "UPDATE MOD"
-                  : "INSTALL MOD"
-              }
-              icon={<GrUpdate />}
-              onClick={handleUpdateMod}
-              variant="secondary"
-              disabled={!gameInfo?.isInstalled}
-            />
+            {installedMods["tou-mira"].isUpdateAvailable && (
+              <Button
+                label={
+                  installedMods["tou-mira"].isActive
+                    ? "UPDATE MOD"
+                    : "INSTALL MOD"
+                }
+                icon={<GrUpdate />}
+                onClick={handleUpdateMod}
+                variant="secondary"
+                disabled={!(status.status === "idle" && gameInfo?.isInstalled)}
+              />
+            )}
             {!installedMods["better-crewmates"].isActive && (
               <Button
                 label="INSTALL BETTER CREW"

@@ -23,10 +23,6 @@ export const GameInfo: React.FC<GameInfoProps> = ({ gameInfo }) => {
           <span className={styles.label}>Detected Location:</span>
           <span className={styles.value}>{gameInfo.detectedLocation}</span>
         </div>
-        <div className={styles.infoItem}>
-          <span className={styles.label}>Game Version:</span>
-          <span className={styles.version}>{gameInfo.version}</span>
-        </div>
       </div>
     </div>
   );

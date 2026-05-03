@@ -7,9 +7,16 @@ import { findBetterCrew } from "./utils/getBetterCrew";
 import { cleanInstall } from "./utils/cleanInstall";
 import { getMiraMod } from "./utils/getMiraMod";
 import { launchGame } from "./utils/launchGame";
-import { updateElectronApp } from "update-electron-app";
+import { updateElectronApp, UpdateSourceType } from "update-electron-app";
 
-updateElectronApp();
+updateElectronApp({
+  updateSource: {
+    host: "https://github.com/",
+    type: UpdateSourceType.ElectronPublicUpdateService,
+    repo: "mposavac/AmongUs-ModManager",
+  },
+  updateInterval: "1 hour",
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -24,7 +31,7 @@ const createWindow = () => {
     alwaysOnTop: true,
     fullscreenable: false,
     resizable: false,
-    autoHideMenuBar: true,
+    // autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },

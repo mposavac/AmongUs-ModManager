@@ -6,16 +6,17 @@ import { app } from "electron";
 import { sendMessage } from "./sendMessage";
 import { getMiraMod } from "./getMiraMod";
 import { IModItem } from "../types/mods";
+import { getLatestModVersionData } from "./getLatestModVersionData";
 
 export const intallLatestMod = async (event: any, gamePath: string) => {
-  const repoUrl = import.meta.env.VITE_MOD_API_URL;
   const tempZipPath = path.join(app.getPath("downloads"), "mod-download.zip");
 
   try {
     // Get the download URL from GitHub API
-    const { data } = await axios.get(repoUrl);
-    const downloadUrl = data.assets.find((a) =>
-      a.name.includes("steam-itch.zip"),
+    const latestRelease = await getLatestModVersionData();
+
+    const downloadUrl = latestRelease?.assets.find((asset) =>
+      asset.name.includes("steam-itch.zip"),
     )?.browser_download_url;
 
     // Download the mod file
@@ -28,7 +29,7 @@ export const intallLatestMod = async (event: any, gamePath: string) => {
     sendMessage(
       event,
       "clean-install-status",
-      `Intalling the mod (version ${data?.name})...`,
+      `Intalling the mod (version ${latestRelease?.name})...`,
     );
     const zip = new AdmZip(tempZipPath);
     const zipEntries = zip.getEntries(); // Get all files/folders in zip
@@ -60,7 +61,7 @@ export const intallLatestMod = async (event: any, gamePath: string) => {
     sendMessage(
       event,
       "clean-install-status",
-      `Mod successfully installed (version ${data?.name})...`,
+      `Mod successfully installed (version ${latestRelease?.name})...`,
     );
     const modData: Partial<IModItem> | null = await getMiraMod();
     if (!modData) {

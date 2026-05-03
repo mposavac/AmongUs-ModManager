@@ -10,6 +10,7 @@ export interface IModItem {
   isActive: boolean;
   icon?: string;
   path?: string;
+  isUpdateAvailable?: boolean;
 }
 
 export interface IModsInfo {

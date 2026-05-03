@@ -2,7 +2,7 @@
   "name": "among-us-launcher",
   "productName": "Among Us - Mod Manager",
   "description": "Mod manager for Among Us.",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",

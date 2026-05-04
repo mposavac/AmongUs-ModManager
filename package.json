@@ -2,7 +2,7 @@
   "name": "among-us-launcher",
   "productName": "Among Us - Mod Manager",
   "description": "Mod manager for Among Us.",
-  "version": "0.2.10",
+  "version": "1.0.0",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -13,7 +13,9 @@
   },
   "keywords": [],
   "author": {
-    "name": "Matej Posavac"
+    "name": "Matej Posavac",
+    "email": "matposavac@gmail.com",
+    "url": "https://github.com/mposavac/AmongUs-ModManager"
   },
   "license": "MIT",
   "repository": {

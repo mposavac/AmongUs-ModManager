@@ -5,8 +5,13 @@ import { IModItem } from "../types/mods";
 
 const getBetterCrewInfo = () => {
   try {
+    const localAppData = process.env.LOCALAPPDATA;
+    if (!localAppData) {
+      throw new Error("LOCALAPPDATA environment variable not found");
+    }
+
     const bclPath = path.join(
-      process.env.LOCALAPPDATA,
+      localAppData,
       "Programs",
       "bettercrewlink",
       "Better-CrewLink.exe",

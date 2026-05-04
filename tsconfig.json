@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "nodenext",
-    "allowJs": true,
+    "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "sourceMap": true,
     "baseUrl": ".",
     "outDir": "dist",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "jsx": "react-jsx"
-  }
+    "jsx": "react-jsx",
+    "ignoreDeprecations": "6.0",
+    "types": ["vite/client"]
+  },
+  "include": ["src", "vite-env.d.ts", "src/types/**/*.d.ts"]
 }

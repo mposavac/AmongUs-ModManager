@@ -34,19 +34,19 @@ export const ModManager: React.FC = () => {
   }, []);
 
   const getModsInfo = useCallback(async () => {
-    const betterCrewData: IModItem = await window.electronAPI.findBetterCrew();
-    const miraModData: IModItem = await window.electronAPI.findMiraMod();
+    const betterCrewData = await window.electronAPI.findBetterCrew();
+    const miraModData = await window.electronAPI.findMiraMod();
     const latestRealeaseData = await getLatestModVersionData();
     setInstalledMods({
       "better-crewmates": {
         ...betterCrewDefault,
-        ...betterCrewData,
+        ...(betterCrewData || {}),
       },
       "tou-mira": {
         ...miraModDefault,
-        ...miraModData,
+        ...(miraModData || {}),
         isUpdateAvailable:
-          miraModData.version !== latestRealeaseData.name?.replace("v", ""),
+          miraModData?.version !== latestRealeaseData.name?.replace("v", ""),
       },
     });
   }, []);
@@ -61,39 +61,45 @@ export const ModManager: React.FC = () => {
       setStatus({ message, status: "loading" });
     });
     window.electronAPI.onVersionStatusChange(
-      (modName: "tou-mira" | "better-crewmates", modData: IModItem) => {
-        console.log(modName, modData);
-        setInstalledMods((curr) => ({
-          ...curr,
-          [modName]: { ...curr[modName], ...modData },
-        }));
+      (name: string, modData: IModItem) => {
+        console.log(name, modData);
+        setInstalledMods((curr) => {
+          if (!curr) return null;
+          return {
+            ...curr,
+            [name]: { ...curr[name as keyof typeof curr], ...modData },
+          };
+        });
         setStatus({ message: "Game is ready!", status: "idle" });
       },
     );
   }, []);
 
   const handleCleanInstall = async () => {
+    if (!gameInfo?.detectedLocation) return;
     setStatus({
       status: "loading",
       message: "Performing clean install...",
     });
-    await window.electronAPI.cleanInstall(gameInfo?.detectedLocation);
+    await window.electronAPI.cleanInstall(gameInfo.detectedLocation);
   };
 
   const handleUpdateMod = async () => {
+    if (!gameInfo?.detectedLocation) return;
     setStatus({
       status: "loading",
       message: "Installing latest mod update...",
     });
-    await window.electronAPI.installLatestMod(gameInfo?.detectedLocation);
+    await window.electronAPI.installLatestMod(gameInfo.detectedLocation);
   };
 
   const handleInstallBetterCrew = async () => {
     setStatus({
-      status: "loading",
-      message: "Installing BetterCrewmates...",
+      status: "idle",
+      message: "Follow instructions to BetterCrewmates...",
     });
-    await window.electronAPI.openExternal(import.meta.env.VITE_BETTER_CREW_URL);
+    const url = import.meta.env.VITE_BETTER_CREW_URL as string;
+    await window.electronAPI.openExternal(url);
   };
 
   const handleLaunchGame = async () => {

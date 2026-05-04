@@ -9,6 +9,10 @@ import { getMiraMod } from "./utils/getMiraMod";
 import { launchGame } from "./utils/launchGame";
 import { updateElectronApp, UpdateSourceType } from "update-electron-app";
 
+// Declare global Vite-injected variables
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
+declare const MAIN_WINDOW_VITE_NAME: string;
+
 updateElectronApp({
   updateSource: {
     host: "https://github.com/",

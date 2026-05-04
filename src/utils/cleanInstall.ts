@@ -4,13 +4,27 @@ import fs from "fs";
 import { sendMessage } from "./sendMessage";
 import { intallLatestMod } from "./intallLatestMod";
 import { miraModDefault } from "./mockData";
+import { checkSteam } from "./checkSteam";
 
-export const cleanInstall = async (event: any, gamePath: string) => {
+export const cleanInstall = async (event: unknown, gamePath: string) => {
   try {
     const steamPath = path.resolve(gamePath, "..", "..", "..");
-    execSync("start steam://start");
-    sendMessage(event, "clean-install-status", "Closing steam...");
+    const isSteamRunning = await checkSteam();
+    if (!isSteamRunning) {
+      execSync("start steam://start");
+      sendMessage(event, "clean-install-status", "Checking steam...");
+      await new Promise<void>((resolve) => {
+        const checkInterval = setInterval(async () => {
+          const isSteamRunning = await checkSteam();
+          if (isSteamRunning) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 5000);
+      });
+    }
     await new Promise((resolve) => setTimeout(resolve, 5000));
+    sendMessage(event, "clean-install-status", "Closing steam...");
     console.log("Closing Steam...");
     execSync("start steam://exit");
 

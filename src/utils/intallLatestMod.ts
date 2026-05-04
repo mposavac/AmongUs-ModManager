@@ -8,6 +8,11 @@ import { getMiraMod } from "./getMiraMod";
 import { IModItem } from "../types/mods";
 import { getLatestModVersionData } from "./getLatestModVersionData";
 
+interface Asset {
+  name: string;
+  browser_download_url: string;
+}
+
 export const intallLatestMod = async (event: any, gamePath: string) => {
   const tempZipPath = path.join(app.getPath("downloads"), "mod-download.zip");
 
@@ -15,7 +20,7 @@ export const intallLatestMod = async (event: any, gamePath: string) => {
     // Get the download URL from GitHub API
     const latestRelease = await getLatestModVersionData();
 
-    const downloadUrl = latestRelease?.assets.find((asset) =>
+    const downloadUrl = latestRelease?.assets.find((asset: Asset) =>
       asset.name.includes("steam-itch.zip"),
     )?.browser_download_url;
 
@@ -74,7 +79,8 @@ export const intallLatestMod = async (event: any, gamePath: string) => {
     return { success: true };
   } catch (error) {
     console.error(error);
-    return { success: false, error: error.message };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { success: false, error: errorMessage };
   } finally {
     // Delete temp file
     if (fs.existsSync(tempZipPath)) {

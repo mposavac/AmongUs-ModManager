@@ -61,7 +61,7 @@ export const ModManager: React.FC = () => {
       setStatus({ message, status: "loading" });
     });
     window.electronAPI.onVersionStatusChange(
-      (name: string, modData: IModItem) => {
+      async (name: string, modData: IModItem) => {
         console.log(name, modData);
         setInstalledMods((curr) => {
           if (!curr) return null;
@@ -70,6 +70,8 @@ export const ModManager: React.FC = () => {
             [name]: { ...curr[name as keyof typeof curr], ...modData },
           };
         });
+        await getGameInfo();
+        await getModsInfo();
         setStatus({ message: "Game is ready!", status: "idle" });
       },
     );

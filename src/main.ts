@@ -7,20 +7,13 @@ import { findBetterCrew } from "./utils/getBetterCrew";
 import { cleanInstall } from "./utils/cleanInstall";
 import { getMiraMod } from "./utils/getMiraMod";
 import { launchGame } from "./utils/launchGame";
-import { updateElectronApp, UpdateSourceType } from "update-electron-app";
+import { updateElectronApp } from "update-electron-app";
 
 // Declare global Vite-injected variables
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
-updateElectronApp({
-  updateSource: {
-    host: "https://github.com/",
-    type: UpdateSourceType.ElectronPublicUpdateService,
-    repo: "mposavac/AmongUs-ModManager",
-  },
-  updateInterval: "1 hour",
-});
+updateElectronApp();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -32,10 +25,9 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    alwaysOnTop: true,
     fullscreenable: false,
     resizable: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: app.isPackaged,
     icon: path.join(__dirname, "assets/img/logo.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -55,6 +47,7 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+// Note: 'ready' handled above to include updater check
 app.on("ready", createWindow);
 
 // Quit when all windows are closed, except on macOS. There, it's common

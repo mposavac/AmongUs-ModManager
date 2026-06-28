@@ -1,5 +1,5 @@
 import React from "react";
-import { ModItem as ModItemType } from "../../types/mods";
+import { IModItem as ModItemType } from "../../types/mods";
 import styles from "./ModItem.module.css";
 
 interface ModItemProps {
@@ -17,6 +17,9 @@ export const ModItem: React.FC<ModItemProps> = ({ mod }) => {
         </div>
       </div>
       {mod.isActive && <span className={styles.activeBadge}>(Active)</span>}
+      {!mod.isActive && (
+        <span className={styles.inactiveBadge}>(Not installed)</span>
+      )}
     </div>
   );
 };

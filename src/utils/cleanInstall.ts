@@ -6,7 +6,12 @@ import { intallLatestMod } from "./intallLatestMod";
 import { miraModDefault } from "./mockData";
 import { checkSteam } from "./checkSteam";
 
-export const cleanInstall = async (event: unknown, gamePath: string) => {
+export const cleanInstall = async (
+  event: unknown,
+  gamePath: string,
+  gameVersion: string,
+  modVersion: string,
+) => {
   try {
     const steamPath = path.resolve(gamePath, "..", "..", "..");
     const isSteamRunning = await checkSteam();
@@ -43,7 +48,7 @@ export const cleanInstall = async (event: unknown, gamePath: string) => {
       name: "tou-mira",
       data: miraModDefault,
     });
-    // Edit appmanifest_945360.acf to force "public" branch
+    // Edit appmanifest_945360.acf to force gameVersion branch
     const manifestPath = path.join(
       steamPath,
       "steamapps",
@@ -51,20 +56,20 @@ export const cleanInstall = async (event: unknown, gamePath: string) => {
     );
 
     if (fs.existsSync(manifestPath)) {
-      console.log("Resetting manifest to public branch...");
+      console.log(`Resetting manifest to ${gameVersion}  branch...`);
       sendMessage(
         event,
         "clean-install-status",
-        "Resetting manifest to public branch...",
+        `Resetting manifest to ${gameVersion} branch...`,
       );
 
       const content = fs.readFileSync(manifestPath, "utf8");
 
       // Use Regex to find the UserConfig section and replace BetaKey
-      // This looks for "BetaKey" and whatever follows it, replacing it with "public"
+      // This looks for "BetaKey" and whatever follows it, replacing it with "gameVersion"
       const updatedContent = content.replace(
         /"UserConfig"\s*\{[\s\S]*?\}/,
-        `"UserConfig"\n\t{\n\t\t"language"\t\t"english"\n\t\t"BetaKey"\t\t"public"\n\t}`,
+        `"UserConfig"\n\t{\n\t\t"language"\t\t"english"\n\t\t"BetaKey"\t\t"${gameVersion}"\n\t}`,
       );
 
       fs.writeFileSync(manifestPath, updatedContent);
@@ -92,7 +97,7 @@ export const cleanInstall = async (event: unknown, gamePath: string) => {
           "Among Us restored. Downloading latest mod version...",
         );
         clearInterval(waitForGameAndInstall);
-        await intallLatestMod(event, gamePath);
+        await intallLatestMod(event, gamePath, modVersion);
         return true;
       }
     }, 5000);

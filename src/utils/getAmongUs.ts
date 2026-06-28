@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import path from "path";
 import fs from "fs";
+import { IGameInfo } from "../types/mods";
 
 export const getSteamPath = () => {
   try {
@@ -22,13 +23,37 @@ export const getSteamPath = () => {
   return null;
 };
 
-export const getAmongUsLocation = async () => {
+export const getAmongUsLocation = async (): Promise<IGameInfo | null> => {
   const steamPath = getSteamPath();
   if (!steamPath) return null;
 
+  const getGameVersion = (gamePath: string) => {
+    const steamPath = path.resolve(gamePath, "..", "..", "..");
+    const manifestPath = path.join(
+      steamPath,
+      "steamapps",
+      "appmanifest_945360.acf",
+    );
+    const manifestContent = fs.readFileSync(manifestPath, "utf8");
+
+    const userConfigMatch = manifestContent.match(
+      /"UserConfig"\s*\{[\s\S]*?\}/,
+    );
+    return userConfigMatch
+      ? (userConfigMatch[0].match(/"BetaKey"\s+"([^"]+)"/) || [])[1] || "public"
+      : "public";
+  };
+
   // Check default location first
   const defaultPath = path.join(steamPath, "steamapps", "common", "Among Us");
-  if (fs.existsSync(defaultPath)) return defaultPath;
+  if (fs.existsSync(defaultPath)) {
+    const data: IGameInfo = {
+      isInstalled: true,
+      detectedLocation: defaultPath,
+      version: getGameVersion(defaultPath),
+    };
+    return data;
+  }
 
   // Check other libraries
   const vdfPath = path.join(steamPath, "steamapps", "libraryfolders.vdf");
@@ -49,7 +74,12 @@ export const getAmongUsLocation = async () => {
       );
 
       if (fs.existsSync(gamePath)) {
-        return gamePath;
+        const data: IGameInfo = {
+          isInstalled: true,
+          detectedLocation: gamePath,
+          version: getGameVersion(gamePath),
+        };
+        return data;
       }
     }
   }

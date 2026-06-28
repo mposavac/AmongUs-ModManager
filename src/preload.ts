@@ -7,10 +7,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   findAmongUs: () => ipcRenderer.invoke("locate-game"),
   findBetterCrew: () => ipcRenderer.invoke("locate-better-crew"),
   findMiraMod: () => ipcRenderer.invoke("locate-mira-mod"),
-  installLatestMod: (path: string) => ipcRenderer.invoke("install-mod", path),
+  installLatestMod: (path: string, modVersion: string) =>
+    ipcRenderer.invoke("install-mod", path, modVersion),
   openExternal: (url: string) => ipcRenderer.invoke("open-external", url),
-  cleanInstall: (gamePath: string, steamPath: string) =>
-    ipcRenderer.invoke("clean-install", gamePath, steamPath),
+  cleanInstall: (gamePath: string, gameVersion: string, modVersion: string) =>
+    ipcRenderer.invoke("clean-install", gamePath, gameVersion, modVersion),
   launchGame: () => ipcRenderer.invoke("launch-game"),
   onCleanStatusUpdate: (callback: (message: string) => void) =>
     ipcRenderer.on("clean-install-status", (_, value) => callback(value)),

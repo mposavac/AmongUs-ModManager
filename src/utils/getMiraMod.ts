@@ -7,11 +7,11 @@ import { getAmongUsLocation } from "./getAmongUs";
 const getMiraModnfo = async () => {
   try {
     const gamePath = await getAmongUsLocation();
-    if (!gamePath) {
+    if (!gamePath?.detectedLocation) {
       throw "Among us not found";
     }
     const modDllPath = path.join(
-      gamePath,
+      gamePath.detectedLocation,
       "BepInEx",
       "plugins",
       "TownOfUsMira.dll",

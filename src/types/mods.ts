@@ -22,3 +22,16 @@ export interface ILauncherStatus {
   status: "idle" | "loading" | "error" | "success";
   message: string;
 }
+
+export interface ISettingsInfo {
+  amongUs: {
+    targetVersion: string;
+  };
+  townOfUs: {
+    targetVersion: string;
+  };
+  modManager: {
+    enableGameVersionChange: boolean;
+    enableModVersionChange: boolean;
+  };
+}

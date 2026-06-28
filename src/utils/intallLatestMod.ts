@@ -6,19 +6,23 @@ import { app } from "electron";
 import { sendMessage } from "./sendMessage";
 import { getMiraMod } from "./getMiraMod";
 import { IModItem } from "../types/mods";
-import { getLatestModVersionData } from "./getLatestModVersionData";
+import { getModVersionData } from "./getModVersionData";
 
 interface Asset {
   name: string;
   browser_download_url: string;
 }
 
-export const intallLatestMod = async (event: any, gamePath: string) => {
+export const intallLatestMod = async (
+  event: any,
+  gamePath: string,
+  modVersion: string,
+) => {
   const tempZipPath = path.join(app.getPath("downloads"), "mod-download.zip");
 
   try {
     // Get the download URL from GitHub API
-    const latestRelease = await getLatestModVersionData();
+    const latestRelease = await getModVersionData(modVersion);
 
     const downloadUrl = latestRelease?.assets.find((asset: Asset) =>
       asset.name.includes("steam-itch.zip"),

@@ -45,7 +45,14 @@
 }
 
 .activeBadge {
-  color: #f6ad55;
+  color: #48bb78;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.inactiveBadge {
+  color: #f4847a;
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;

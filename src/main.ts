@@ -1,4 +1,11 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  shell,
+  dialog,
+  autoUpdater,
+} from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { getAmongUsLocation } from "./utils/getAmongUs";
@@ -13,7 +20,51 @@ import { updateElectronApp } from "update-electron-app";
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string | undefined;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
-updateElectronApp();
+let mainWindow: BrowserWindow | null = null;
+
+const showUpdateDialog = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    dialog
+      .showMessageBox({
+        type: "info",
+        buttons: ["Restart", "Later"],
+        title: "Application Update",
+        message: "A new version has been downloaded.",
+        detail: "Restart the application to apply the updates.",
+      })
+      .then(({ response }) => {
+        if (response === 0) {
+          autoUpdater.quitAndInstall();
+        }
+      });
+    return;
+  }
+
+  const wasAlwaysOnTop = mainWindow.isAlwaysOnTop();
+  mainWindow.setAlwaysOnTop(false);
+
+  dialog
+    .showMessageBox(mainWindow, {
+      type: "info",
+      buttons: ["Restart", "Later"],
+      title: "Application Update",
+      message: "A new version has been downloaded.",
+      detail: "Restart the application to apply the updates.",
+    })
+    .then(({ response }) => {
+      mainWindow?.setAlwaysOnTop(wasAlwaysOnTop);
+
+      if (response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+};
+
+updateElectronApp({
+  onNotifyUser: () => {
+    showUpdateDialog();
+  },
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -22,12 +73,13 @@ if (started) {
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     fullscreenable: false,
     resizable: false,
     autoHideMenuBar: app.isPackaged,
+    alwaysOnTop: true,
     icon: path.join(__dirname, "assets/img/logo.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -68,8 +120,8 @@ app.on("activate", () => {
 });
 
 ipcMain.handle("locate-game", async () => {
-  const path = getAmongUsLocation();
-  return path;
+  const data = getAmongUsLocation();
+  return data;
 });
 
 ipcMain.handle("locate-mira-mod", async () => {
@@ -86,12 +138,15 @@ ipcMain.handle("open-external", async (_, url) => {
   shell.openExternal(url);
 });
 
-ipcMain.handle("clean-install", async (event, gamePath) => {
-  await cleanInstall(event, gamePath);
-});
+ipcMain.handle(
+  "clean-install",
+  async (event, gamePath, gameVersion, modVersion) => {
+    await cleanInstall(event, gamePath, gameVersion, modVersion);
+  },
+);
 
-ipcMain.handle("install-mod", async (event, gamePath) => {
-  intallLatestMod(event, gamePath);
+ipcMain.handle("install-mod", async (event, gamePath, modVersion) => {
+  intallLatestMod(event, gamePath, modVersion);
 });
 
 ipcMain.handle("launch-game", async () => {

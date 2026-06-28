@@ -8,7 +8,7 @@ import {
   mockLauncherStatus,
 } from "../utils/mockData";
 import styles from "./ModManager.module.css";
-import { IGameInfo, IModItem, IModsInfo } from "../types/mods";
+import { IGameInfo, IModItem, IModsInfo, ISettingsInfo } from "../types/mods";
 import {
   FaMicrophone,
   GiBroom,
@@ -17,26 +17,38 @@ import {
 } from "../icons/icons";
 import logo from "../assets/img/logo.png";
 import packageJson from "../../package.json";
-import { getLatestModVersionData } from "../utils/getLatestModVersionData";
+import { getModVersionData } from "../utils/getModVersionData";
 
 export const ModManager: React.FC = () => {
   const [status, setStatus] = useState(mockLauncherStatus);
+  const [settingsInfo, setSettingsInfo] = useState<ISettingsInfo | null>(null);
   const [gameInfo, setGameInfo] = useState<IGameInfo | null>(null);
   const [installedMods, setInstalledMods] = useState<IModsInfo | null>(null);
 
+  const targetModVersion = settingsInfo?.townOfUs.targetVersion || "latest";
+  const targetGameVersion = settingsInfo?.amongUs.targetVersion || "public";
+
+  const isCleanInstallRequired = targetGameVersion !== gameInfo?.version;
+  const getSettingsInfo = useCallback(async () => {
+    const res = await fetch(import.meta.env.VITE_SETTINGS_URL).then((res) =>
+      res.json(),
+    );
+    setSettingsInfo(res);
+  }, []);
+
   const getGameInfo = useCallback(async () => {
-    const gamePath = await window.electronAPI.findAmongUs();
+    const gameInfo = await window.electronAPI.findAmongUs();
     setGameInfo({
-      isInstalled: !!gamePath,
-      detectedLocation: gamePath || "",
-      version: "123",
+      isInstalled: !!gameInfo?.isInstalled,
+      detectedLocation: gameInfo?.detectedLocation || "-",
+      version: gameInfo?.version,
     });
   }, []);
 
   const getModsInfo = useCallback(async () => {
     const betterCrewData = await window.electronAPI.findBetterCrew();
     const miraModData = await window.electronAPI.findMiraMod();
-    const latestRealeaseData = await getLatestModVersionData();
+    const modReleaseData = await getModVersionData(targetModVersion);
     setInstalledMods({
       "better-crewmates": {
         ...betterCrewDefault,
@@ -46,15 +58,23 @@ export const ModManager: React.FC = () => {
         ...miraModDefault,
         ...(miraModData || {}),
         isUpdateAvailable:
-          miraModData?.version !== latestRealeaseData.name?.replace("v", ""),
+          miraModData?.version !== modReleaseData.tag_name?.replace("v", "") &&
+          settingsInfo?.modManager.enableModVersionChange,
       },
     });
-  }, []);
+  }, [settingsInfo]);
 
   useEffect(() => {
-    getGameInfo();
-    getModsInfo();
+    getSettingsInfo();
   }, []);
+
+  console.log({ settingsInfo });
+  useEffect(() => {
+    if (settingsInfo) {
+      getGameInfo();
+      getModsInfo();
+    }
+  }, [settingsInfo]);
 
   useEffect(() => {
     window.electronAPI.onCleanStatusUpdate((message: string) => {
@@ -83,16 +103,23 @@ export const ModManager: React.FC = () => {
       status: "loading",
       message: "Performing clean install...",
     });
-    await window.electronAPI.cleanInstall(gameInfo.detectedLocation);
+    await window.electronAPI.cleanInstall(
+      gameInfo.detectedLocation,
+      targetGameVersion,
+      targetModVersion,
+    );
   };
 
   const handleUpdateMod = async () => {
     if (!gameInfo?.detectedLocation) return;
     setStatus({
       status: "loading",
-      message: "Installing latest mod update...",
+      message: `Installing ${targetModVersion} mod update...`,
     });
-    await window.electronAPI.installLatestMod(gameInfo.detectedLocation);
+    await window.electronAPI.installLatestMod(
+      gameInfo.detectedLocation,
+      targetModVersion,
+    );
   };
 
   const handleInstallBetterCrew = async () => {
@@ -117,6 +144,7 @@ export const ModManager: React.FC = () => {
       status: "loading",
       message: "Refreshing game information...",
     });
+    await getSettingsInfo();
     await getGameInfo();
     await getModsInfo();
     setTimeout(() => {
@@ -158,11 +186,11 @@ export const ModManager: React.FC = () => {
                   status.status === "idle" &&
                   installedMods["tou-mira"].isActive &&
                   gameInfo.isInstalled
-                )
+                ) || isCleanInstallRequired
               }
             />
             <Button
-              label="CLEAN INSTALL"
+              label={`CLEAN INSTALL ${isCleanInstallRequired ? "(REQUIRED)" : ""}`}
               icon={<GiBroom />}
               onClick={handleCleanInstall}
               variant="danger"

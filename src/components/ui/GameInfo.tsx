@@ -1,5 +1,5 @@
 import React from "react";
-import { GameInfo as GameInfoType } from "../../types/mods";
+import { IGameInfo as GameInfoType } from "../../types/mods";
 import styles from "./GameInfo.module.css";
 
 interface GameInfoProps {
@@ -20,8 +20,12 @@ export const GameInfo: React.FC<GameInfoProps> = ({ gameInfo }) => {
           </span>
         </div>
         <div className={styles.infoItem}>
-          <span className={styles.label}>Detected Location:</span>
+          <span className={styles.label}>Location:</span>
           <span className={styles.value}>{gameInfo.detectedLocation}</span>
+        </div>
+        <div className={styles.infoItem}>
+          <span className={styles.label}>Version:</span>
+          <span className={styles.value}>{gameInfo.version}</span>
         </div>
       </div>
     </div>
